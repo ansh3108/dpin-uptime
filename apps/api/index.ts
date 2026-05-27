@@ -22,7 +22,21 @@ app.post("/api/v1/website", authMiddleware, async (req, res) => {
     })
 })
 
-app.get("/api/v1/website/status", authMiddleware, (req, res) => {
+app.get("/api/v1/website/status?", authMiddleware, async (req, res) => {
+    const websiteId = req.query.websiteId! as unknown as string;
+    const userId = req.userId;
+
+    const data = await prismaClient.website.findFirst({
+        where: {
+            id: websiteId,
+            userId
+        }, 
+        include: {
+            ticks: true
+        }
+    })
+
+    res.json(data)
 
 })
 
