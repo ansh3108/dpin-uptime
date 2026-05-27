@@ -29,7 +29,8 @@ app.get("/api/v1/website/status?", authMiddleware, async (req, res) => {
     const data = await prismaClient.website.findFirst({
         where: {
             id: websiteId,
-            userId
+            userId,
+            disabled: false
         }, 
         include: {
             ticks: true
@@ -40,11 +41,39 @@ app.get("/api/v1/website/status?", authMiddleware, async (req, res) => {
 
 })
 
-app.get("/api/v1/websites", authMiddleware, (req, res) => {
+app.get("/api/v1/websites", authMiddleware, async (req, res) => {
+    const userId = req.userId!;
+    
+    const websites = await prismaClient.website.findMany({
+        where: {
+            userId
+        }
+    })
+
+    res.json({
+        websites,
+        disabled: false
+    })
 
 })
 
-app.delete("/api/v1/website/", authMiddleware, (req, res) => {
+app.delete("/api/v1/website/", authMiddleware, async (req, res) => {
+    const websiteId = req.body.websiteId;
+    const userId = req.userId!;
+
+    await prismaClient.website.update({
+        where: {
+            id: websiteId,
+            userId
+        },
+        data: {
+            disabled: true
+        }
+    })
+
+    res.json({
+        message: "Deleted website successfully"
+    })
 
 })
 
